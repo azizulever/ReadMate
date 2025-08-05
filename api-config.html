@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Configuration - ReadMate</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .config-container {
+            max-width: 800px;
+            margin: 100px auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .config-section {
+            margin-bottom: 2rem;
+        }
+        .config-section h3 {
+            color: #2563eb;
+            margin-bottom: 1rem;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 1rem 0;
+        }
+        .step {
+            background: #d1ecf1;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid #bee5eb;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            transition: color 0.3s ease;
+        }
+        .back-btn:hover {
+            color: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="config-container">
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to ReadMate
+        </a>
+        
+        <h1>🤖 AI API Configuration Guide</h1>
+        <p>Follow these steps to integrate real AI-powered responses into your ReadMate chatbot.</p>
+
+        <div class="config-section">
+            <h3>📋 Prerequisites</h3>
+            <ul>
+                <li>OpenAI account (or alternative AI service)</li>
+                <li>API key from your chosen provider</li>
+                <li>Basic understanding of JavaScript</li>
+            </ul>
+        </div>
+
+        <div class="config-section">
+            <h3>🔑 Step 1: Get Your API Key</h3>
+            <div class="step">
+                <strong>For OpenAI:</strong>
+                <ol>
+                    <li>Visit <a href="https://platform.openai.com/" target="_blank">OpenAI Platform</a></li>
+                    <li>Create an account or sign in</li>
+                    <li>Navigate to API Keys section</li>
+                    <li>Create a new secret key</li>
+                    <li>Copy and save your API key securely</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>⚙️ Step 2: Configure the API</h3>
+            <p>Open <code>js/script.js</code> and find the <code>callOpenAIAPI</code> function:</p>
+            
+            <div class="code-block">
+const API_KEY = 'your-openai-api-key'; // Replace with your actual API key
+const API_URL = 'https://api.openai.com/v1/chat/completions';
+            </div>
+
+            <div class="highlight">
+                <strong>⚠️ Security Note:</strong> Never expose your API key in client-side code for production. 
+                Consider using a backend proxy server to securely handle API calls.
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>🔄 Step 3: Enable AI Responses</h3>
+            <p>In the <code>getAIResponse</code> function, replace the simulated response with:</p>
+            
+            <div class="code-block">
+async function getAIResponse(userMessage) {
+    try {
+        // Use the real API instead of simulated responses
+        return await callOpenAIAPI(userMessage);
+    } catch (error) {
+        console.error('AI API error:', error);
+        // Fallback to keyword-based responses
+        return getKeywordBasedResponse(userMessage);
+    }
+}
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>🛡️ Step 4: Add Error Handling</h3>
+            <p>Implement robust error handling for API failures:</p>
+            
+            <div class="code-block">
+// Add rate limiting
+let lastApiCall = 0;
+const API_RATE_LIMIT = 1000; // 1 second between calls
+
+async function callOpenAIAPI(userMessage) {
+    const now = Date.now();
+    if (now - lastApiCall < API_RATE_LIMIT) {
+        throw new Error('Rate limit exceeded');
+    }
+    lastApiCall = now;
+    
+    // ... rest of API call code
+}
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>🌐 Step 5: Backend Proxy (Recommended)</h3>
+            <p>For production, create a backend server to handle API calls:</p>
+            
+            <div class="code-block">
+// Backend endpoint
+POST /api/chat
+{
+    "message": "user message",
+    "context": "book recommendations"
+}
+
+// Frontend call
+const response = await fetch('/api/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message: userMessage})
+});
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>🎯 Alternative AI Services</h3>
+            <div class="step">
+                <strong>Other Options:</strong>
+                <ul>
+                    <li><strong>Google Gemini:</strong> https://ai.google.dev/</li>
+                    <li><strong>Cohere:</strong> https://cohere.ai/</li>
+                    <li><strong>Anthropic Claude:</strong> https://anthropic.com/</li>
+                    <li><strong>Hugging Face:</strong> https://huggingface.co/</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h3>📊 Testing Your Integration</h3>
+            <ol>
+                <li>Add your API key to the configuration</li>
+                <li>Open the browser developer console</li>
+                <li>Test the chatbot with various queries</li>
+                <li>Monitor for any API errors</li>
+                <li>Verify response quality and relevance</li>
+            </ol>
+        </div>
+
+        <div class="highlight">
+            <strong>💡 Pro Tip:</strong> Start with the current keyword-based system for development, 
+            then gradually integrate AI responses. This ensures your application works even 
+            if the AI service is unavailable.
+        </div>
+
+        <div class="config-section">
+            <h3>🚀 Ready to Deploy?</h3>
+            <p>Your ReadMate application is ready for deployment to:</p>
+            <ul>
+                <li><strong>GitHub Pages:</strong> Free static hosting</li>
+                <li><strong>Netlify:</strong> Easy deployment with build tools</li>
+                <li><strong>Vercel:</strong> Optimized for frontend frameworks</li>
+                <li><strong>Firebase Hosting:</strong> Google's hosting solution</li>
+            </ul>
+        </div>
+
+        <a href="index.html" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 2rem;">
+            <i class="fas fa-home"></i>
+            Return to ReadMate
+        </a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+</body>
+</html>

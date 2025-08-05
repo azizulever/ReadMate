@@ -1,0 +1,44 @@
+{
+  "name": "readmate",
+  "version": "1.0.0",
+  "description": "ReadMate - Your Personal Book Buddy. A web-based application that helps users discover books with AI-powered recommendations.",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000 --open=/index.html",
+    "dev": "live-server --port=3000 --open=/index.html --watch",
+    "build": "echo 'This is a static website. No build process required.'",
+    "deploy": "echo 'Ready for deployment to GitHub Pages, Netlify, or Vercel'",
+    "test": "echo 'No tests specified yet'"
+  },
+  "keywords": [
+    "books",
+    "recommendation",
+    "ai",
+    "chatbot",
+    "reading",
+    "literature",
+    "web-app",
+    "javascript",
+    "html",
+    "css"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/readmate.git"
+  },
+  "homepage": "https://yourusername.github.io/readmate",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "not dead"
+  ]
+}
