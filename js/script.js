@@ -215,7 +215,19 @@ function addMessage(content, sender) {
     
     const messageContent = document.createElement('div');
     messageContent.className = 'message-content';
-    messageContent.innerHTML = `<p>${content}</p>`;
+    
+    // Process the content to handle formatting
+    let processedContent = content;
+    
+    // Convert markdown-style formatting to HTML if AI still uses it
+    processedContent = processedContent
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // **text** to <strong>text</strong>
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')              // *text* to <em>text</em>
+        .replace(/\n/g, '<br>')                             // Line breaks
+        .replace(/• /g, '• ')                              // Bullet points
+        .replace(/(\d+\.\s)/g, '<br>$1');                  // Numbered lists
+    
+    messageContent.innerHTML = `<p>${processedContent}</p>`;
     
     messageDiv.appendChild(avatar);
     messageDiv.appendChild(messageContent);
@@ -255,10 +267,80 @@ function isBookRelated(message) {
     return bookKeywords.some(keyword => message.toLowerCase().includes(keyword));
 }
 
+// Call Gemini AI API
+async function callGeminiAPI(userMessage) {
+    const API_KEY = 'AIzaSyDOP9GWh8Ju5v2g0oC9t0vy3Nj4D07r8QQ';
+    const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    
+    try {
+        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `You are ReadMate, a knowledgeable book expert and recommendation assistant. You have extensive knowledge about books, authors, genres, literary history, and reading culture. You only answer book-related questions.
+
+If the user asks about anything not related to books, politely redirect them to book topics.
+
+For book-related questions:
+- Provide concise but informative answers with 3-5 specific book recommendations
+- Include book titles, authors, and brief one-sentence descriptions
+- Share relevant facts about books or authors when helpful
+- Give direct, helpful responses without excessive detail
+- Keep responses conversational and engaging
+- Format text using HTML tags: use <strong> for emphasis instead of ** or markdown
+
+User question: "${userMessage}"
+
+Provide a helpful response with specific book recommendations. Keep it informative but concise (aim for 2-3 paragraphs maximum).`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.7,
+                    topK: 40,
+                    topP: 0.95,
+                    maxOutputTokens: 800,
+                }
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            return data.candidates[0].content.parts[0].text;
+        } else {
+            throw new Error('Invalid API response format');
+        }
+    } catch (error) {
+        console.error('Gemini API error:', error);
+        throw error;
+    }
+}
+
 // Simulate AI response (replace with actual API call)
 async function getAIResponse(userMessage) {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    // Try Gemini AI first, fallback to keyword-based responses
+    try {
+        const aiResponse = await callGeminiAPI(userMessage);
+        return aiResponse;
+    } catch (error) {
+        console.error('AI API failed, using fallback responses:', error);
+        // Fallback to existing keyword-based system
+        return await getKeywordBasedResponse(userMessage);
+    }
+}
+
+// Keyword-based fallback responses
+async function getKeywordBasedResponse(userMessage) {
+    // Simulate API delay for consistency
+    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
     
     const message = userMessage.toLowerCase();
     
@@ -381,49 +463,8 @@ function initializeImages() {
     }
 }
 
-// API Integration Functions (for future implementation)
-async function callOpenAIAPI(userMessage) {
-    // This function would integrate with OpenAI's API
-    // For now, we're using the simulated response above
-    
-    const API_KEY = 'your-openai-api-key'; // Replace with actual API key
-    const API_URL = 'https://api.openai.com/v1/chat/completions';
-    
-    try {
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: JSON.stringify({
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are ReadMate, a helpful book recommendation assistant. Provide personalized book recommendations based on user preferences, mood, and interests. Keep responses concise and include specific book titles and authors.'
-                    },
-                    {
-                        role: 'user',
-                        content: userMessage
-                    }
-                ],
-                max_tokens: 300,
-                temperature: 0.7
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('API request failed');
-        }
-        
-        const data = await response.json();
-        return data.choices[0].message.content;
-    } catch (error) {
-        console.error('OpenAI API error:', error);
-        throw error;
-    }
-}
+// API Integration - Using Gemini AI (see callGeminiAPI function above)
+// Old OpenAI function replaced with Gemini integration
 
 // Generate book cover image URL using multiple sources
 function generateBookCoverImage(title, author) {
